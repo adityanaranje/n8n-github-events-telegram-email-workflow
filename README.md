@@ -3,6 +3,12 @@
 ![n8n](https://img.shields.io/badge/n8n-Workflow-blue) ![GitHub](https://img.shields.io/badge/GitHub-Automation-green) ![LLM](https://img.shields.io/badge/LLM-Google%20Gemini-orange)
 
 This **n8n workflow** automates the processing of **GitHub events** and sends structured notifications via **Telegram** and **Email**, leveraging **LLMs** and custom scripts for intelligent message formatting.
+---
+
+## 🖼️ **Workflow Preview**
+<img src="https://raw.githubusercontent.com/USERNAME/REPO/main/workflow_preview.png" alt="n8n Workflow" width="600">
+
+
 
 ---
 
@@ -82,5 +88,22 @@ docker run -it --rm \
 - Messages are formatted and parsed for clarity and readability.
 
 ---
+## 📚 Resources
+
+- [n8n Documentation](https://docs.n8n.io/)  
+- [Cloudflare Tunnel Docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/)  
+- [Telegram Credentials Docs](https://docs.n8n.io/integrations/builtin/credentials/telegram/)  
+- [Gemini API Docs](https://cloud.google.com/vertex-ai/docs/generative-ai/start/quickstarts)  
+- [Github Credentials](https://docs.n8n.io/integrations/builtin/trigger-nodes/n8n-nodes-base.githubtrigger/)
+
+---
+
+### 💡 Conclusion
+
+This project demonstrates how n8n + LLMs + No-Code Automation can transform GitHub events into real-time AI-powered notifications.
+With just Docker, n8n, and a few APIs — you can monitor repositories and send intelligent updates to Telegram and email in minutes 🚀
+---
+
+Made with ❤️ using [Docker Desktop](https://docs.docker.com/desktop/), [n8n](https://n8n.io/), [Gemini](https://aistudio.google.com/), and ☁️ [Cloudflare](https://www.cloudflare.com/)
 
 
