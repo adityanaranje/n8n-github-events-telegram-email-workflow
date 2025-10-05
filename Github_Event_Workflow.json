@@ -1,0 +1,215 @@
+{
+  "name": "GitHub Event Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [-32, 1152],
+      "id": "cee67d01-1bd3-4b18-9c71-45e91e24ac2e",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GOOGLE_API_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [224, 1312],
+      "id": "9517bd9b-5dcc-4b75-b615-3ccf34537059",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GOOGLE_API_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "757c0620-2efc-4d69-8676-42e2f32afd0a",
+              "name": "text",
+              "value": "=Github Update:-\n{{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [320, 560],
+      "id": "aca386f8-719e-47d6-b2da-f21ebc6a4e62",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert email formatter.\n\nTask: Convert the GitHub event summary provided in json.text into a professional email format suitable for sending as an email. Follow these rules:\n\n1. Output a JSON object with two keys:\n   - \"subject\": A short, clear, and catchy email subject including emojis if appropriate.\n   - \"body\": The detailed email body in HTML format (<p>, <ul>, <li>, <b>, <i> tags), preserving emojis and line breaks where appropriate.\n2. Keep the content readable and structured for email recipients.\n3. Use bullet points (<ul><li>...</li></ul>) for key details (e.g., event type, repository, user, action).\n4. Preserve bold/italic emphasis using HTML tags.\n5. Avoid including any extra text outside the JSON object.\n6. Remove all backticks or Markdown formatting.\n\nInput: {{ $json.text }}\n\nOutput Example:\n\n{\n  \"subject\": \"🚨 New GitHub Activity Detected!\",\n  \"body\": \"<p>Hi there! 👋</p><p>We've detected a new event on your GitHub repository. Here are the details:</p><ul><li><b>Event Type:</b> 👁️ Watch</li><li><b>Repository:</b> REPO_NAME</li><li><b>User:</b> USERNAME</li><li><b>Action:</b> Starred/Unstarred</li></ul><p>No automated action was taken. Configure a handler if you want notifications.</p><p>Cheers! 🚀</p>\"\n}\n",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [304, 1120],
+      "id": "7cccf88c-19f7-445f-8d95-f6e93e170037",
+      "name": "Basic LLM Chain For Email"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"subject\": \"\",\n\t\"body\": \"\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [512, 1296],
+      "id": "4eff76e7-65bd-4070-9774-5fc80fac2768",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "owner": "GITHUB_USERNAME",
+        "repository": "REPO_NAME",
+        "events": ["*"],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [-432, 928],
+      "id": "2acd9303-6b38-4237-bf97-1180981db2a3",
+      "name": "Github Event Trigger",
+      "webhookId": "WEBHOOK_ID",
+      "credentials": {
+        "githubApi": {
+          "id": "GITHUB_API_CREDENTIAL_ID",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Detect event type from GitHub header\nconst eventType = $json[\"headers\"][\"x-github-event\"];\nconst body = $json[\"body\"];\nlet message = \"⚠️ Unhandled GitHub event.\";\n\nconst now = new Date();\nconst options = {\n    timeZone: 'Asia/Kolkata',\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n    hour: '2-digit',\n    minute: '2-digit',\n    second: '2-digit',\n    hour12: false\n};\nconst currentTime = new Intl.DateTimeFormat('en-IN', options).format(now);\n\nswitch (eventType) {\n  case \"star\":\n    const starAction = body.action === \"created\" ? \"⭐️ Starred\" : \"❌ Unstarred\";\n    message = `${starAction} by ${body.sender.login}\\n📦 Repository: ${body.repository.full_name}\\n🔗 ${body.repository.html_url}`;\n    break;\n  case \"push\":\n    message = `🚀 New push on ${body.repository.full_name}\\n👤 By: ${body.pusher.name}\\n📍 Branch: ${body.ref.replace(\"refs/heads/\", \"\")}\\n💬 Commit: ${body.head_commit.message}\\n🔗 ${body.head_commit.url}`;\n    break;\n  case \"fork\":\n    message = `🍴 Repository forked!\\n📦 ${body.repository.full_name}\\n👤 By: ${body.forkee.owner.login}\\n🔗 ${body.forkee.html_url}`;\n    break;\n  case \"issues\":\n    message = `🐛 Issue ${body.action}\\n📦 ${body.repository.full_name}\\n#️⃣ Issue: ${body.issue.title}\\n👤 By: ${body.sender.login}\\n🔗 ${body.issue.html_url}`;\n    break;\n  case \"pull_request\":\n    message = `🔀 Pull Request ${body.action}\\n📦 ${body.repository.full_name}\\n#️⃣ PR: ${body.pull_request.title}\\n👤 By: ${body.sender.login}\\n🔗 ${body.pull_request.html_url}`;\n    break;\n  case \"release\":\n    message = `📢 New Release ${body.action}\\n📦 ${body.repository.full_name}\\n🏷️ Version: ${body.release.tag_name}\\n👤 By: ${body.sender.login}\\n🔗 ${body.release.html_url}`;\n    break;\n  default:\n    message = `📡 Received event: ${eventType}\\n⚠️ No handler configured.`;\n    break;\n}\n\nreturn [{\n  event: eventType,\n  message,\n  timestamp: currentTime\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-224, 928],
+      "id": "64866b7e-3a5e-4360-a055-a7a9bffa7013",
+      "name": "Format response"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a summary of github event to send to user on below points. Use proper bullet points if needed and add emojis. Remove unnecessary preambles. Give timestamp in words as e.g. 10 Jan 2025 10:30 pm for date and time as it is.\nevent : {{ $json.event }}\nmessage : {{ $json.message }}\ntimestamp : {{ $json.timestamp }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [-32, 928],
+      "id": "e2b08686-24cb-4c68-9b5a-ed43025a6424",
+      "name": "Basic LLM Response"
+    },
+    {
+      "parameters": {
+        "chatId": "TELEGRAM_CHAT_ID",
+        "text": "={{ $json.message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [848, 912],
+      "id": "83bac266-dca1-46a1-ab45-92d610b2ad79",
+      "name": "Send Github Event Update",
+      "webhookId": "WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "TELEGRAM_API_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "EMAIL_ADDRESS",
+        "subject": "={{ $json.output.subject }}",
+        "message": "={{ $json.output.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [848, 1120],
+      "id": "68ded35c-a9e4-434f-8728-1b5acf509916",
+      "name": "Send Github Event Update1",
+      "webhookId": "WEBHOOK_ID",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAIL_OAUTH2_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [512, 928],
+      "id": "111e2d83-d706-403c-936a-ccabd8dff255",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GOOGLE_API_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input text from GitHub webhook\nlet text = $input.first().json.text\n\nconst escapeTelegram = (str) => {\n    return str.replace(/([_*[\\]()~`>#+\\-=|{}.!])/g, \"\\\\$1\");\n}\n\nlet safeMessage = escapeTelegram(text);\n\nreturn {\n    json: {\n        message: safeMessage\n    }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [832, 560],
+      "id": "9875c96d-4a3e-4e5e-b655-fcee6b82529a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Convert the following GitHub push message into a Telegram-safe plain text message. Keep the original content intact. Remove or replace any Markdown characters (*, _, [, ], (, )) that could break Telegram formatting. Output only the cleaned message.\n {{ $json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [512, 560],
+      "id": "20ecac5c-8952-44fb-a860-d204efcb42ec",
+      "name": "Basic LLM Telegram"
+    }
+  ],
+  "pinData": {},
+  "connections": { /* connections remain unchanged */ },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "VERSION_ID",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "INSTANCE_ID"
+  },
+  "id": "WORKFLOW_ID",
+  "tags": []
+}
