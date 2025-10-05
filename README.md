@@ -6,7 +6,7 @@ This **n8n workflow** automates the processing of **GitHub events** and sends st
 ---
 
 ## 🖼️ **Workflow Preview**
-<img src="https://raw.githubusercontent.com/USERNAME/REPO/main/workflow_preview.png" alt="n8n Workflow" width="600">
+<img src="https://github.com/adityanaranje/n8n-github-events-telegram-email-workflow/blob/main/n8n-githubworkflow.png" alt="n8n Workflow" width="1000">
 
 
 
@@ -67,7 +67,8 @@ docker run -it --rm \
 ```
 
 2. **Download the workflow JSON** provided above.
-    Check out the workflow and code here: [https://github.com/adityanaranje/CODEVO](https://github.com/adityanaranje/CODEVO)
+    Check out the workflow and code here: [Workflow.json](https://github.com/adityanaranje/n8n-github-events-telegram-email-workflow/blob/main/Github_Event_Workflow.json
+)
     
 3. **Import the workflow JSON** in n8n.
   
